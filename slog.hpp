@@ -4,7 +4,6 @@
 #include <mutex>
 #include <string>
 
-// ANSI color codes
 #define RESET   "\033[0m"
 #define GRAY    "\033[90m"
 #define BLUE    "\033[34m"
@@ -22,7 +21,10 @@ namespace slog {
         ERROR
     };
 
+    inline Level logLevel = Level::DEBUG;
+
     class Logger {
+
     public:
         static void trace(const std::string& message, const char* file, int line) {
             log(message, Level::TRACE, file, line, GRAY, "TRACE");
@@ -44,8 +46,13 @@ namespace slog {
             log(message, Level::ERROR, file, line, RED, "ERROR");
         }
 
+        inline void setLevel(Level newLevel) {
+            logLevel = newLevel;
+        }
+
     private:
         static void log(const std::string& message, Level level, const char* file, int line, const char* color, const char* levelStr) {
+            if (logLevel > level) return;
             std::lock_guard<std::mutex> lock(mutex_);
             std::cout << color << "[" << levelStr << "] "
                       << file << ":" << line << " - " << message << RESET << std::endl;
@@ -59,8 +66,8 @@ namespace slog {
 } // namespace slog
 
 // Simplified macros
-#define LOG_TRACE(message) slog::Logger::trace(message, __FILE__, __LINE__)
-#define LOG_DEBUG(message) slog::Logger::debug(message, __FILE__, __LINE__)
-#define LOG_INFO(message) slog::Logger::info(message, __FILE__, __LINE__)
-#define LOG_WARNING(message) slog::Logger::warning(message, __FILE__, __LINE__)
-#define LOG_ERROR(message) slog::Logger::error(message, __FILE__, __LINE__)
+#define trc(message) slog::Logger::trace(message, __FILE__, __LINE__)
+#define dbg(message) slog::Logger::debug(message, __FILE__, __LINE__)
+#define nfo(message) slog::Logger::info(message, __FILE__, __LINE__)
+#define wrn(message) slog::Logger::warning(message, __FILE__, __LINE__)
+#define err(message) slog::Logger::error(message, __FILE__, __LINE__)
