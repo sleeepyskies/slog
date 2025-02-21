@@ -3,4 +3,5 @@ SLog is a simple logging library written in c++ to use in my personal projects. 
 
 ## Features
 - Thread safety
-- Colored console ouput for different levels
+- Colored console output for different levels
+- Variable number of arguments

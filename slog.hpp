@@ -26,24 +26,29 @@ namespace slog {
     class Logger {
 
     public:
-        static void trace(const std::string& message, const char* file, const int line) {
-            log(message, Level::TRACE, file, line, GRAY, "TRACE");
+        template<typename... Args>
+        static void trace(const std::string& message, const char* file, const int line, Args... args) {
+            log(message, Level::TRACE, file, line, GRAY, "TRACE", args...);
         }
 
-        static void debug(const std::string& message, const char* file, const int line) {
-            log(message, Level::DEBUG, file, line, BLUE, "DEBUG");
+        template<typename... Args>
+        static void debug(const std::string& message, const char* file, const int line, Args... args) {
+            log(message, Level::DEBUG, file, line, BLUE, "DEBUG", args...);
         }
 
-        static void info(const std::string& message, const char* file, const int line) {
-            log(message, Level::INFO, file, line, GREEN, "INFO");
+        template<typename... Args>
+        static void info(const std::string& message, const char* file, const int line, Args... args) {
+            log(message, Level::INFO, file, line, GREEN, "INFO", args...);
         }
 
-        static void warning(const std::string& message, const char* file, const int line) {
-            log(message, Level::WARNING, file, line, YELLOW, "WARNING");
+        template<typename... Args>
+        static void warning(const std::string& message, const char* file, const int line, Args... args) {
+            log(message, Level::WARNING, file, line, YELLOW, "WARNING", args...);
         }
 
-        static void error(const std::string& message, const char* file, const int line) {
-            log(message, Level::ERROR, file, line, RED, "ERROR");
+        template<typename... Args>
+        static void error(const std::string& message, const char* file, const int line, Args... args) {
+            log(message, Level::ERROR, file, line, RED, "ERROR", args...);
         }
 
         static void setLevel(const Level newLevel) {
@@ -51,11 +56,16 @@ namespace slog {
         }
 
     private:
-        static void log(const std::string& message, const Level level, const char* file, const int line, const char* color, const char* levelStr) {
+        template<typename... Args>
+        static void log(const std::string& message, const Level level, const char* file, const int line, const char* color, const char* levelStr, Args... args) {
             if (logLevel > level) return;
             std::lock_guard<std::mutex> lock(mutex_);
             std::cout << color << "[" << levelStr << "] "
-                      << file << ":" << line << " - " << message << RESET << std::endl;
+                      << file << ":" << line << " - " << message;
+
+            ((std::cout << " " << args), ...);
+
+            std::cout << RESET << std::endl;
         }
 
         static std::mutex mutex_;
@@ -66,8 +76,8 @@ namespace slog {
 } // namespace slog
 
 // Simplified macros
-#define trc(message) slog::Logger::trace(message, __FILE__, __LINE__)
-#define dbg(message) slog::Logger::debug(message, __FILE__, __LINE__)
-#define nfo(message) slog::Logger::info(message, __FILE__, __LINE__)
-#define wrn(message) slog::Logger::warning(message, __FILE__, __LINE__)
-#define err(message) slog::Logger::error(message, __FILE__, __LINE__)
+#define trc(message, ...) slog::Logger::trace(message, __FILE__, __LINE__, __VA_ARGS__)
+#define dbg(message, ...) slog::Logger::debug(message, __FILE__, __LINE__, __VA_ARGS__)
+#define nfo(message, ...) slog::Logger::info(message, __FILE__, __LINE__, __VA_ARGS__)
+#define wrn(message, ...) slog::Logger::warning(message, __FILE__, __LINE__, __VA_ARGS__)
+#define err(message, ...) slog::Logger::error(message, __FILE__, __LINE__, __VA_ARGS__)
