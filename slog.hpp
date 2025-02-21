@@ -21,37 +21,37 @@ namespace slog {
         ERROR
     };
 
-    inline Level logLevel = Level::DEBUG;
+    inline auto logLevel = Level::DEBUG;
 
     class Logger {
 
     public:
-        static void trace(const std::string& message, const char* file, int line) {
+        static void trace(const std::string& message, const char* file, const int line) {
             log(message, Level::TRACE, file, line, GRAY, "TRACE");
         }
 
-        static void debug(const std::string& message, const char* file, int line) {
+        static void debug(const std::string& message, const char* file, const int line) {
             log(message, Level::DEBUG, file, line, BLUE, "DEBUG");
         }
 
-        static void info(const std::string& message, const char* file, int line) {
+        static void info(const std::string& message, const char* file, const int line) {
             log(message, Level::INFO, file, line, GREEN, "INFO");
         }
 
-        static void warning(const std::string& message, const char* file, int line) {
+        static void warning(const std::string& message, const char* file, const int line) {
             log(message, Level::WARNING, file, line, YELLOW, "WARNING");
         }
 
-        static void error(const std::string& message, const char* file, int line) {
+        static void error(const std::string& message, const char* file, const int line) {
             log(message, Level::ERROR, file, line, RED, "ERROR");
         }
 
-        inline void setLevel(Level newLevel) {
+        static void setLevel(const Level newLevel) {
             logLevel = newLevel;
         }
 
     private:
-        static void log(const std::string& message, Level level, const char* file, int line, const char* color, const char* levelStr) {
+        static void log(const std::string& message, const Level level, const char* file, const int line, const char* color, const char* levelStr) {
             if (logLevel > level) return;
             std::lock_guard<std::mutex> lock(mutex_);
             std::cout << color << "[" << levelStr << "] "
