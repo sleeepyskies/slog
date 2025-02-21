@@ -61,17 +61,15 @@ namespace slog {
             if (logLevel > level) return;
             std::lock_guard<std::mutex> lock(mutex_);
             std::cout << color << "[" << levelStr << "] "
-                      << file << ":" << line << " - " << message;
+                      << file << ":" << line << " - " << message << RESET;
 
             ((std::cout << " " << args), ...);
 
-            std::cout << RESET << std::endl;
+            std::cout << std::endl;
         }
 
-        static std::mutex mutex_;
+        inline static std::mutex mutex_;
     };
-
-    std::mutex Logger::mutex_;
 
 } // namespace slog
 
