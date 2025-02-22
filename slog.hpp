@@ -73,9 +73,8 @@ namespace slog {
 
 } // namespace slog
 
-// Simplified macros
-#define trc(message, ...) slog::Logger::trace(message, __FILE__, __LINE__, __VA_ARGS__)
-#define dbg(message, ...) slog::Logger::debug(message, __FILE__, __LINE__, __VA_ARGS__)
-#define nfo(message, ...) slog::Logger::info(message, __FILE__, __LINE__, __VA_ARGS__)
-#define wrn(message, ...) slog::Logger::warning(message, __FILE__, __LINE__, __VA_ARGS__)
-#define err(message, ...) slog::Logger::error(message, __FILE__, __LINE__, __VA_ARGS__)
+#define trc(message, ...) slog::Logger::trace(message, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+#define dbg(message, ...) slog::Logger::debug(message, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+#define nfo(message, ...) slog::Logger::info(message, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+#define wrn(message, ...) slog::Logger::warning(message, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+#define err(message, ...) slog::Logger::error(message, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
