@@ -6,7 +6,9 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
-
+# build stuffs
 /cmake-build-debug/
-
+# clion
 /.idea
+# macos
+.DS_Store
