@@ -3,6 +3,7 @@
 #include <iostream>
 #include <mutex>
 #include <string>
+#include <format>
 
 #define RESET   "\033[0m"
 #define GRAY    "\033[90m"
@@ -29,29 +30,30 @@ namespace slog {
     class Logger {
     public:
         template<typename... Args>
-        static void trace(const std::string& message, const char* file, const int line, Args... args) {
-            log(message, Level::TRACE, file, line, GRAY, "TRC", args...);
+        static void trace(const std::string& fmt, const char* file, const int line, Args&&... args) {
+            log(fmt, Level::TRACE, file, line, GRAY, "TRC", std::forward<Args>(args)...);
         }
 
         template<typename... Args>
-        static void debug(const std::string& message, const char* file, const int line, Args... args) {
-            log(message, Level::DEBUG, file, line, BLUE, "DBG", args...);
+        static void debug(const std::string& fmt, const char* file, const int line, Args&&... args) {
+            log(fmt, Level::DEBUG, file, line, BLUE, "DBG", std::forward<Args>(args)...);
         }
 
         template<typename... Args>
-        static void info(const std::string& message, const char* file, const int line, Args... args) {
-            log(message, Level::INFO, file, line, GREEN, "NFO", args...);
+        static void info(const std::string& fmt, const char* file, const int line, Args&&... args) {
+            log(fmt, Level::INFO, file, line, GREEN, "NFO", std::forward<Args>(args)...);
         }
 
         template<typename... Args>
-        static void warning(const std::string& message, const char* file, const int line, Args... args) {
-            log(message, Level::WARNING, file, line, YELLOW, "WRN", args...);
+        static void warning(const std::string& fmt, const char* file, const int line, Args&&... args) {
+            log(fmt, Level::WARNING, file, line, YELLOW, "WRN", std::forward<Args>(args)...);
         }
 
         template<typename... Args>
-        static void error(const std::string& message, const char* file, const int line, Args... args) {
-            log(message, Level::ERROR, file, line, RED, "ERR", args...);
+        static void error(const std::string& fmt, const char* file, const int line, Args&&... args) {
+            log(fmt, Level::ERROR, file, line, RED, "ERR", std::forward<Args>(args)...);
         }
+
 
         static void setLevel(const Level newLevel) {
             logLevel = newLevel;
@@ -59,14 +61,12 @@ namespace slog {
 
     private:
         template<typename... Args>
-        static void log(const std::string& message, const Level level, const char* file, const int line, const char* color, const char* levelStr, Args... args) {
+        static void log(const std::string& fmt, const Level level, const char* file, const int line, const char* color, const char* levelStr, Args&&... args) {
             if (logLevel > level) return;
             std::lock_guard<std::mutex> lock(m_mutex);
 
-            std::cout << color << "[" << levelStr << "] " << RESET << message;
-
-            ((std::cout << " " << args), ...);
-
+            std::cout << color << "[" << levelStr << "] " << RESET;
+            std::cout << std::vformat(fmt, std::make_format_args(args...));
             std::cout << " " << file << ":" << line << std::endl;
         }
 
@@ -77,8 +77,9 @@ namespace slog {
 
 // Macros used for simplified logging, should be the preferred way to log.
 
-#define trc(message, ...) slog::Logger::trace(message, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
-#define dbg(message, ...) slog::Logger::debug(message, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
-#define nfo(message, ...) slog::Logger::info(message, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
-#define wrn(message, ...) slog::Logger::warning(message, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
-#define err(message, ...) slog::Logger::error(message, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+#define trc(fmt, ...) slog::Logger::trace(fmt, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+#define dbg(fmt, ...) slog::Logger::debug(fmt, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+#define nfo(fmt, ...) slog::Logger::info(fmt, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+#define wrn(fmt, ...) slog::Logger::warning(fmt, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+#define err(fmt, ...) slog::Logger::error(fmt, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+
