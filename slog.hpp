@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 #include <format>
+#include <chrono>
 
 #define RESET   "\033[0m"
 #define GRAY    "\033[90m"
@@ -14,10 +15,11 @@
 
 /// @brief slog Is a super lightweight logging library. It provides
 /// colored output, thread safety and variable log arguments.
-namespace slog {
-
+namespace slog
+{
     /// @brief Enum representing the different log levels. Log level can be changed using setLevel()
-    enum class Level {
+    enum class Level
+    {
         TRACE,
         DEBUG,
         INFO,
@@ -27,52 +29,65 @@ namespace slog {
 
     inline auto logLevel = Level::DEBUG;
 
-    class Logger {
+    class Logger
+    {
     public:
-        template<typename... Args>
-        static void trace(const std::string& fmt, const char* file, const int line, Args&&... args) {
+        template <typename... Args>
+        static void trace(const std::string& fmt, const char* file, const int line, Args&&... args)
+        {
             log(fmt, Level::TRACE, file, line, GRAY, "TRC", std::forward<Args>(args)...);
         }
 
-        template<typename... Args>
-        static void debug(const std::string& fmt, const char* file, const int line, Args&&... args) {
+        template <typename... Args>
+        static void debug(const std::string& fmt, const char* file, const int line, Args&&... args)
+        {
             log(fmt, Level::DEBUG, file, line, BLUE, "DBG", std::forward<Args>(args)...);
         }
 
-        template<typename... Args>
-        static void info(const std::string& fmt, const char* file, const int line, Args&&... args) {
+        template <typename... Args>
+        static void info(const std::string& fmt, const char* file, const int line, Args&&... args)
+        {
             log(fmt, Level::INFO, file, line, GREEN, "NFO", std::forward<Args>(args)...);
         }
 
-        template<typename... Args>
-        static void warning(const std::string& fmt, const char* file, const int line, Args&&... args) {
+        template <typename... Args>
+        static void warning(const std::string& fmt, const char* file, const int line, Args&&... args)
+        {
             log(fmt, Level::WARNING, file, line, YELLOW, "WRN", std::forward<Args>(args)...);
         }
 
-        template<typename... Args>
-        static void error(const std::string& fmt, const char* file, const int line, Args&&... args) {
+        template <typename... Args>
+        static void error(const std::string& fmt, const char* file, const int line, Args&&... args)
+        {
             log(fmt, Level::ERROR, file, line, RED, "ERR", std::forward<Args>(args)...);
         }
 
 
-        static void setLevel(const Level newLevel) {
+        static void setLevel(const Level newLevel)
+        {
             logLevel = newLevel;
         }
 
     private:
-        template<typename... Args>
-        static void log(const std::string& fmt, const Level level, const char* file, const int line, const char* color, const char* levelStr, Args&&... args) {
+        template <typename... Args>
+        static void log(const std::string& fmt, const Level level, const char* file, const int line, const char* color,
+                        const char* levelStr, Args&&... args)
+        {
             if (logLevel > level) return;
             std::lock_guard<std::mutex> lock(m_mutex);
 
-            std::cout << color << "[" << levelStr << "] " << RESET;
+            const auto now = std::chrono::system_clock::now();
+            const auto nowSeconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
+            const auto localTime = std::chrono::current_zone()->to_local(nowSeconds);
+
+            std::cout << color << "[" << levelStr;
+            std::cout << " " << localTime << "] " << RESET;
             std::cout << std::vformat(fmt, std::make_format_args(args...));
             std::cout << " " << file << ":" << line << std::endl;
         }
 
         inline static std::mutex m_mutex;
     };
-
 } // namespace slog
 
 // Macros used for simplified logging, should be the preferred way to log.
@@ -82,4 +97,3 @@ namespace slog {
 #define nfo(fmt, ...) slog::Logger::info(fmt, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
 #define wrn(fmt, ...) slog::Logger::warning(fmt, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
 #define err(fmt, ...) slog::Logger::error(fmt, __FILE__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
-
